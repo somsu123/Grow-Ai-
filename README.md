@@ -545,8 +545,8 @@ npm run test:coverage
 
 **Somsubhro**
 
-- GitHub: [@somsubhro](https://github.com/somsubhro)
-- LinkedIn: [linkedin.com/in/somsubhro](https://linkedin.com/in/somsubhro)
+- GitHub: [@somsubhro](https://github.com/somsu123)
+- LinkedIn: [linkedin.com/in/somsubhro](www.linkedin.com/in/somsubhro-karmakar)
 
 ---
 
