@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  # ── Ollama (local LLM) ─────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: groweasy-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Backend (Express API) ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: groweasy-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - AI_MODEL=llama3.2
+      - AI_MAX_TOKENS=16000
+      - AI_BATCH_SIZE=5
+      - AI_MAX_RETRIES=3
+      - MAX_FILE_SIZE_MB=10
+      - UPLOAD_DIR=uploads
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - backend_uploads:/app/uploads
+
+  # ── Frontend (Next.js) ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./nextjs-app
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    container_name: groweasy-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  backend_uploads:
