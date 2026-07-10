@@ -4,9 +4,9 @@
   "description": "AI-powered CSV importer backend for GrowEasy CRM",
   "main": "dist/server.js",
   "scripts": {
-    "build": "cd ../app && npx tsc -p ../server/tsconfig.json",
-    "start": "cd ../app && npx tsx ../server/src/server.ts",
-    "dev": "cd ../app && npx tsx watch ../server/src/server.ts",
+    "build": "npx tsc -p tsconfig.json",
+    "start": "npx tsx src/server.ts",
+    "dev": "npx tsx watch src/server.ts",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist",
     "test": "jest --config jest.config.json",

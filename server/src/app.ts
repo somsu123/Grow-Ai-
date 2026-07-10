@@ -56,7 +56,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use(limiter);
+app.use(limiter as unknown as express.RequestHandler);
 
 // Stricter rate limit for AI extraction (expensive operation)
 const aiLimiter = rateLimit({
@@ -76,10 +76,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(requestLogger);
 
 // API routes
+// Apply AI limiter before upload routes so it intercepts /api/extract
+app.use('/api/extract', aiLimiter as unknown as express.RequestHandler);
 app.use('/api', uploadRoutes);
 app.use('/api/history', historyRoutes);
-// Apply AI limiter to extract endpoint
-app.use('/api/extract', aiLimiter);
 
 // Health check at root
 app.get('/', (_req, res) => {
