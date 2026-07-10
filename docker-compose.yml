@@ -47,7 +47,10 @@ services:
       - backend_data:/app/data
 
   # ── Frontend (Next.js standalone) ──────────────────────────────────────────
+  # Only starts when you run: docker compose --profile frontend up -d
+  # On Oracle Cloud you DON'T need this — use Vercel for the frontend.
   frontend:
+    profiles: [frontend]
     build:
       context: ./nextjs-app
       dockerfile: Dockerfile
@@ -68,3 +71,4 @@ volumes:
   ollama_data:
   backend_uploads:
   backend_data:
+

@@ -5,8 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-COPY . .
-RUN npm run build 2>/dev/null || true
+COPY tsconfig.json ./
+COPY src ./src
+
+# Compile TypeScript to dist/
+RUN npx tsc -p tsconfig.json || true
 
 # ---- Runtime stage ----
 FROM node:20-alpine AS runner
@@ -14,18 +17,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install dependencies (production only)
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy compiled output (tsx runs ts directly, so copy src too)
+# Copy TypeScript source (tsx runs .ts directly in production)
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./
 
-# Install tsx for running TypeScript in production
+# Install tsx globally for running TypeScript
 RUN npm install -g tsx
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Create uploads and data directories
+RUN mkdir -p uploads data
 
 EXPOSE 3001
 
