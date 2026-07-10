@@ -1,12 +1,15 @@
 version: "3.9"
 
+# Load .env.deploy for all variable substitutions:
+#   docker compose --env-file .env.deploy up -d
+
 services:
-  # ── Ollama (local LLM) ─────────────────────────────────────────────────────
+  # ── Ollama (local LLM — no API key needed) ─────────────────────────────────
   ollama:
     image: ollama/ollama:latest
-    container_name: groweasy-ollama
+    container_name: ${COMPOSE_PROJECT_NAME:-groweasy}-ollama
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
@@ -17,43 +20,46 @@ services:
       retries: 5
       start_period: 60s
 
-  # ── Backend (Express API) ──────────────────────────────────────────────────
+  # ── Backend (Express API + SQLite) ─────────────────────────────────────────
   backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: groweasy-backend
+    container_name: ${COMPOSE_PROJECT_NAME:-groweasy}-backend
     ports:
-      - "3001:3001"
+      - "${BACKEND_PORT:-3001}:3001"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=3001
-      - OLLAMA_BASE_URL=http://ollama:11434/v1
-      - AI_MODEL=llama3.2
-      - AI_MAX_TOKENS=16000
-      - AI_BATCH_SIZE=5
-      - AI_MAX_RETRIES=3
-      - MAX_FILE_SIZE_MB=10
-      - UPLOAD_DIR=uploads
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434/v1}
+      - AI_MODEL=${AI_MODEL:-llama3.2}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS:-16000}
+      - AI_BATCH_SIZE=${AI_BATCH_SIZE:-5}
+      - AI_MAX_RETRIES=${AI_MAX_RETRIES:-3}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-10}
+      - UPLOAD_DIR=${UPLOAD_DIR:-uploads}
     depends_on:
       ollama:
         condition: service_healthy
     restart: unless-stopped
     volumes:
       - backend_uploads:/app/uploads
+      - backend_data:/app/data
 
-  # ── Frontend (Next.js) ────────────────────────────────────────────────────
+  # ── Frontend (Next.js standalone) ──────────────────────────────────────────
   frontend:
     build:
       context: ./nextjs-app
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://localhost:3001/api
-    container_name: groweasy-frontend
+        # Baked into the Next.js bundle at build time — must match what the
+        # user's browser can reach (not the Docker internal network address).
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+    container_name: ${COMPOSE_PROJECT_NAME:-groweasy}-frontend
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
     depends_on:
       - backend
     restart: unless-stopped
@@ -61,3 +67,4 @@ services:
 volumes:
   ollama_data:
   backend_uploads:
+  backend_data:
