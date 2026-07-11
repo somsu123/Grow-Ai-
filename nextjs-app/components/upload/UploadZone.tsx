@@ -149,7 +149,12 @@ function EmptyStateView({ isDragging, error }: { isDragging: boolean; error: str
  * File selected state - show file info
  */
 function FileSelectedView({ file, onClear }: { file: File; onClear: () => void }) {
-  const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} Bytes`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+  const sizeStr = formatSize(file.size);
 
   return (
     <div className="text-center animate-fade-in">
@@ -158,7 +163,7 @@ function FileSelectedView({ file, onClear }: { file: File; onClear: () => void }
       </div>
 
       <p className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-1">{file.name}</p>
-      <p className="text-sm text-slate-400 mb-4">{sizeMB} MB</p>
+      <p className="text-sm text-slate-400 mb-4">{sizeStr}</p>
 
       <div className="flex items-center gap-3 justify-center">
         <button
