@@ -1,7 +1,0 @@
-node_modules
-.next
-uploads
-*.log
-.env
-.env.local
-dist
