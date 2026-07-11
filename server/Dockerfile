@@ -3,7 +3,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install native build tools required by better-sqlite3
-RUN apk add --no-cache python3 make g++
+# Also symlink python3 -> python since node-gyp expects 'python'
+RUN apk add --no-cache python3 make g++ && \
+    ln -sf /usr/bin/python3 /usr/bin/python
 
 COPY package*.json ./
 RUN npm ci
@@ -21,7 +23,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install native build tools required by better-sqlite3
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ && \
+    ln -sf /usr/bin/python3 /usr/bin/python
 
 # Install dependencies (production only)
 COPY package*.json ./
