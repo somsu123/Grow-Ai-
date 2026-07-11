@@ -37,6 +37,22 @@ The result: any CSV, any column schema, any layout — correctly parsed in a sin
 
 ---
 
+## 💡 Why Ollama Instead of Paid AI APIs?
+
+Most AI-powered tools today are built on top of **paid cloud APIs** — OpenAI, Google Gemini, Anthropic Claude, Groq — where every token processed costs money and every API key is a billing liability. This project deliberately avoids that pattern entirely.
+
+Instead, it uses **[Ollama](https://ollama.com)** — a free, open-source local LLM runtime that runs `llama3.2` (and dozens of other open-weight models) entirely on your own machine:
+
+- **Zero cost, forever** — No API key, no credit card, no rate-limit billing surprises. You can process 10 rows or 10 million rows and the bill stays at $0.
+- **Complete data privacy** — Your CSV files, lead data, and extracted records never leave your machine. Nothing is sent to a third-party server. This matters when handling real customer contact information.
+- **No internet dependency** — Works fully offline. No API outages, no quota exhaustion mid-import, no degraded performance during provider incidents.
+- **Model flexibility** — Switching from `llama3.2` to `mistral`, `phi3`, `gemma2`, or any other Ollama model is a single `.env` change — no code modification required.
+- **Same interface as paid APIs** — Ollama exposes an OpenAI-compatible REST API, so the codebase uses the standard `openai` SDK. If you ever want to switch to a paid provider, it is a two-line environment variable change, not a refactor.
+
+The trade-off: local models are slower than cloud APIs on low-end hardware. On a modern laptop with 16GB RAM, `llama3.2 3B` processes a 100-row batch in roughly 15–30 seconds — fast enough for the import workflow this tool is designed for.
+
+---
+
 ## Features
 
 | Feature | Description |
@@ -170,7 +186,6 @@ groweasy-csv-importer/
 │   │       └── retry.ts               # Exponential backoff withRetry utility
 │   └── src/__tests__/                 # Jest unit tests — 47 cases
 │
-├── docker-compose.yml                 # Full stack: frontend + backend + Ollama
 └── README.md
 ```
 
@@ -414,18 +429,6 @@ cd nextjs-app && npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-### Docker (full stack)
-
-```bash
-docker compose up --build
-```
-
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:3001 |
-| Ollama | http://localhost:11434 |
 
 ---
 
