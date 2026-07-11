@@ -1,13 +1,12 @@
 # ---- Build stage ----
-# Build context = repo root (Render: Root Directory empty, Dockerfile Path = ./server/Dockerfile)
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY server/package*.json ./
+COPY package*.json ./
 RUN npm ci
 
-COPY server/tsconfig.json ./
-COPY server/src ./src
+COPY tsconfig.json ./
+COPY src ./src
 
 # Compile TypeScript to dist/
 RUN npx tsc -p tsconfig.json || true
@@ -19,7 +18,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install dependencies (production only)
-COPY server/package*.json ./
+COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy TypeScript source (tsx runs .ts directly in production)
