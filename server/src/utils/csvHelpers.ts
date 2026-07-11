@@ -92,7 +92,7 @@ export function normalizeCRMStatus(status: string): string {
     'DISCONNECTED': 'BAD_LEAD',
     'UNSUBSCRIBED': 'BAD_LEAD',
     'CANCELLED': 'BAD_LEAD',
-    'COLD': 'BAD_LEAD',
+    'COLD': 'DID_NOT_CONNECT',
 
     // SALE_DONE variants
     'SALE': 'SALE_DONE',
@@ -115,24 +115,24 @@ export function normalizeCRMStatus(status: string): string {
   // Substring / keyword fallback — ORDER MATTERS: more specific patterns first
   // BAD_LEAD: check "NOT INTEREST" before "INTEREST" to avoid false GOOD_LEAD match
   if (upper.includes('NOT INTEREST') || upper.includes('JUNK') || upper.includes('WRONG') ||
-      upper.includes('DND') || upper.includes('DO NOT') || upper.includes('SPAM') ||
-      upper.includes('UNSUB') || upper.includes('LOST') || upper.includes('DISQUALIF') ||
-      upper.includes('REJECT')) {
+    upper.includes('DND') || upper.includes('DO NOT') || upper.includes('SPAM') ||
+    upper.includes('UNSUB') || upper.includes('LOST') || upper.includes('DISQUALIF') ||
+    upper.includes('REJECT')) {
     return 'BAD_LEAD';
   }
   if (upper.includes('NOT CONNECT') || upper.includes('NOT REACH') || upper.includes('NO ANSWER') ||
-      upper.includes('BUSY') || upper.includes('SWITCH') || upper.includes('RNR') ||
-      upper.includes('VOICEMAIL') || upper.includes('NO RESPONSE')) {
+    upper.includes('BUSY') || upper.includes('SWITCH') || upper.includes('RNR') ||
+    upper.includes('VOICEMAIL') || upper.includes('NO RESPONSE')) {
     return 'DID_NOT_CONNECT';
   }
   if (upper.includes('FOLLOW') || upper.includes('HOT') || upper.includes('WARM') ||
-      upper.includes('INTERESTED') || upper.includes('CALLBACK') || upper.includes('DEMO') ||
-      upper.includes('POSITIVE') || upper.includes('ENGAGED') || upper.includes('PROSPECT')) {
+    upper.includes('INTERESTED') || upper.includes('CALLBACK') || upper.includes('DEMO') ||
+    upper.includes('POSITIVE') || upper.includes('ENGAGED') || upper.includes('PROSPECT')) {
     return 'GOOD_LEAD_FOLLOW_UP';
   }
   if (upper.includes('SALE') || upper.includes('SOLD') || upper.includes('BOOK') ||
-      upper.includes('CLOSE') || upper.includes('WON') || upper.includes('CONVERT') ||
-      upper.includes('PAYMENT') || upper.includes('AGREEMENT')) {
+    upper.includes('CLOSE') || upper.includes('WON') || upper.includes('CONVERT') ||
+    upper.includes('PAYMENT') || upper.includes('AGREEMENT')) {
     return 'SALE_DONE';
   }
 
@@ -202,8 +202,8 @@ export function getCurrentDateTime(): string {
 }
 
 export function normalizeDate(dateStr: string): string {
-  // If no date supplied, fall back to current date/time
-  if (!dateStr || !dateStr.trim()) return getCurrentDateTime();
+  // If no date supplied, return empty string
+  if (!dateStr || !dateStr.trim()) return '';
 
   const trimmed = dateStr.trim();
 
@@ -249,8 +249,8 @@ export function normalizeDate(dateStr: string): string {
     return formatToSQLDateTime(directDate);
   }
 
-  // ── Fallback: return current date/time ────────────────────────────────────
-  return getCurrentDateTime();
+  // ── Fallback: return original string if unparseable ─────────────────────
+  return trimmed;
 }
 
 /**

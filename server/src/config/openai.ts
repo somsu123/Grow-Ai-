@@ -15,6 +15,9 @@ export function getOpenAIClient(): OpenAI {
       apiKey: 'ollama',            // Ollama accepts any non-empty string
       baseURL: config.ollama.baseUrl,
       maxRetries: 0,               // We handle retries manually
+      defaultHeaders: {
+        'ngrok-skip-browser-warning': 'true',  // Bypass ngrok interstitial page
+      },
     });
   }
   return client;
